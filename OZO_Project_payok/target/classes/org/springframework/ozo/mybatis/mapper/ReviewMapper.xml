@@ -1,0 +1,35 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.springframework.ozo.mybatis.mapper.ReviewMapper">
+	<cache />
+	<!-- 리뷰 생성 -->
+	<insert id="insertReview" parameterType="Review" >
+		INSERT INTO REVIEW (content, rate, reserve_id, write_date, reply)
+		VALUES (#{review.content}, #{review.rate}, #{reserve_id}, sysDate, '')
+	</insert>
+	<!-- 리뷰 생성 끝-->
+	
+	<resultMap type="Review" id="ReviewBySI">
+		<result column="reply" property="reply" />
+		<result column="rate" property="rate" />
+		<result column="content" property="content" />
+		<result column="writeDate" property="writeDate" />
+		<collection property="reserve" ofType="Reserve">
+			<collection property="Member" ofType="Member">
+				<result column="memId" property="memId" />
+				<result column="profile" property="profile" />
+			</collection>
+		</collection>
+	</resultMap>
+	
+	
+	<select id="getReviewBySpaceId" resultMap="ReviewBySI">
+		SELECT r.reply, r.rate, r.content, rs.memId as memId, m.profile as profile,  r.write_date as writeDate
+		FROM REVIEW r JOIN RESERVE rs ON r.reserve_id = rs.reserve_id JOIN Member m ON m.memid = rs.memid JOIN SPACE s ON s.space_id = rs.space_id AND s.space_id = #{space_id}
+	</select> 
+	
+	
+	
+	
+</mapper>

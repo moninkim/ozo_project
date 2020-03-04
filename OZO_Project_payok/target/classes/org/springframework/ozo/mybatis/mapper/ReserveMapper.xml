@@ -1,0 +1,132 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.springframework.ozo.mybatis.mapper.ReserveMapper">
+	<cache />
+
+	<!-- 예약 할때 날짜 조회 할라고 만ㅁ듬 공간 아이디로 예약 날짜 불러오기 -->
+	<select id="getAvailabilityDate" parameterType="map" resultType="Map" flushCache="false" useCache="true">
+		SELECT TO_CHAR(start_date,'HH24') as "start_date", TO_CHAR(end_date,'HH24') as "end_date"
+		FROM space s, reserve r
+		WHERE s.space_id = #{space_id} AND
+			r.space_id = #{space_id} AND
+			r.state != -1 AND
+            TO_CHAR(start_date,'YYYY-MM-DD') = #{select_date} AND
+			end_date > sysdate
+	</select>
+	<!-- 예약 할때 날짜 조회 할라고 만ㅁ듬  공간 아이디로 예약 날짜 불러오기 끝-->
+	
+	
+	
+	<!-- 예약 생성 -->
+	<insert id="insertReserve" parameterType="Reserve" >
+		INSERT INTO RESERVE (reserve_id, space_id, memid, state, peoplenum, start_date, end_date, create_date, total_cost, payment_id, payment)
+		VALUES (RESERVE_ID_SEQ.nextval, #{space.space_id}, #{member.memId}, 0, #{peoplenum}, #{startDate}, #{endDate}, sysdate, #{total_cost}, #{payment_id}, #{payment})
+		<selectKey keyProperty="reserve_id" resultType="int" order="AFTER">
+			SELECT RESERVE_ID_SEQ.currval FROM dual
+		</selectKey> 
+	</insert>
+	<!-- 예약 생성 끝-->
+	
+	
+	
+	
+	
+	<!--  ㅇㅖ약 상세 조회를 위한 예약아이디로 예약 불러오깅 -->
+	<resultMap type="Reserve" id="reserveById">
+		<id column="reserve_id" property="reserve_id" />
+		<result column="state" property="state" />
+		<result column="peoplenum" property="peoplenum" />
+		<result column="state" property="state" />
+		<result column="total_cost" property="total_cost" />
+		<result column="payment_id" property="payment_id" />
+		<result column="payment" property="payment" />
+		<result column="start_date" property="startDate" />
+		<result column="end_date" property="endDate" />
+		<result column="create_date" property="create_date" />
+		
+		<collection property="space" ofType="Space">
+			<result column="space_id" property="space_id" />
+			<result column="proid" property="member.memId" />
+			<result column="proname" property="member.name" />
+			<result column="proemail" property="member.email" />
+			<result column="name" property="name" />
+			<result column="email" property="email" />
+			<result column="title" property="title" />
+			<result column="type" property="type" />
+			<result column="area" property="area" />
+			<result column="total_rate" property="total_rate" />
+		</collection>
+		
+		
+		<collection property="member" ofType="Member">
+			<result column="reserve_memid" property="memId" />
+			
+		</collection>
+		
+	</resultMap>
+
+
+	<select id="getReserveById" resultMap="reserveById" flushCache="false" useCache="true">
+		SELECT reserve_id, r.memid as "reserve_memid", s.space_id, state, peoplenum, total_rate, TO_CHAR(start_date,'YYYY-MM-DD HH24:MI:SS') as "start_date", TO_CHAR(end_date,'YYYY-MM-DD HH24:MI:SS') as "end_date", TO_CHAR(create_date,'YYYY-MM-DD HH24:MI:SS') as "create_date", total_cost, payment_id, payment , s.title, s.type, s.memid, s.area, m.memid as "proid", m.name as "proname", m.email as "proemail"
+		FROM reserve r, space s, member m
+		WHERE reserve_id = #{reserve_id} AND r.space_id = s.space_id AND m.memId = s.memId 
+	</select>
+	
+	<!--  ㅇㅖ약 상세  조회를 위한 예약아이디로 예약 불러오깅 끝-->
+
+
+	<!--  내가 예약 작성한 들  불러오깅 그니까 이용자-->
+	<resultMap type="Reserve" id="myReserveMap">
+		<id column="reserve_id" property="reserve_id" />
+		<result column="start_date" property="startDate"/>
+		<result column="end_date" property="endDate"/>
+		<result column="total_cost" property="total_cost"/>
+		<result column="state" property="state"/>
+		<collection property="space" ofType="Space">
+			<result column="title" property="title" />
+		</collection>
+		<collection property="space.image_list" ofType="String">
+			<result column="s_image" property="image_list" />
+		</collection>
+	</resultMap>
+	
+	<select id="getMyReserveForCus" resultMap="myReserveMap" flushCache="false" useCache="true">
+		SELECT r.reserve_id, ss.title, r.start_date, r.end_date, r.total_cost, r.state, ss.s_image
+		FROM reserve r, (SELECT s.space_id as s_id, title, image_name as s_image
+                    FROM space s, space_image i
+                    WHERE s.space_id = i.space_id) ss                 
+		WHERE r.memid = #{mem_id} AND r.space_id = s_id
+		ORDER BY r.create_date DESC
+	</select>
+	<!--내가 예약 작성한 들  불러오깅 그니까 이용자 끝-->
+	
+	<!-- 제공자 버전 내한테 들어온 예약 다 -->
+	
+	<select id="getMyReserveForPro" resultMap="myReserveMap" flushCache="false" useCache="true">
+		SELECT r.reserve_id, r.start_date, r.end_date, r.total_cost, r.state, ss.s_image, ss.title
+		FROM reserve r, (SELECT s.space_id as s_id, title, image_name as s_image
+                    FROM space s, space_image i
+                    WHERE s.space_id = i.space_id AND s.memid = #{mem_id}) ss                 
+		WHERE r.space_id = s_id
+		ORDER BY r.create_date DESC
+	</select>
+	<!-- 제공자 버전 내한테 들어온 예약  다 끝 -->
+
+
+	
+	
+	
+	
+	
+	
+	
+	
+
+
+
+
+	
+
+
+</mapper>

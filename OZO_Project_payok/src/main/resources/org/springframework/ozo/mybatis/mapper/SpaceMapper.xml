@@ -1,0 +1,214 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="org.springframework.ozo.mybatis.mapper.SpaceMapper">
+	<cache />
+	
+	<!-- 가장 평점 높은 공간 4개 -->
+	<resultMap type="Space" id="SpaceSummary">
+		<id column="space_id" property="space_id" />
+		<result column="title" property="title" />
+		<result column="type" property="type" />
+		<result column="area" property="area" />
+		<result property="jjim_cnt" column="jjim_cnt"/>
+		<collection property="image_list" ofType="String">
+			<result column="image_name" property="image_name" />
+		</collection>
+	</resultMap>
+	<select id="getRateTop" resultMap="SpaceSummary" flushCache="false" useCache="true">
+		SELECT i.space_id, title, area, type, total_rate, jjim_cnt, image_name
+		FROM (SELECT space_id, image_name FROM SPACE_IMAGE WHERE rowid in (SELECT max(rowid) FROM SPACE_IMAGE GROUP BY space_id)) i ,(SELECT space_id, title, area, type, total_rate, jjim_cnt FROM SPACE ORDER BY total_rate DESC)spa
+		WHERE spa.space_id = i.space_id AND ROWNUM &lt; 5
+	</select>
+	<!-- 가장 평점 높은 공간 4개 끝-->
+	
+	
+	<!--  찜 횟수 가장 많은 4 -->
+	<select id="getJjimTop" resultMap="SpaceSummary" flushCache="false" useCache="true">
+		SELECT i.space_id, title, area, type, total_rate, jjim_cnt, image_name
+		FROM (SELECT space_id, image_name FROM SPACE_IMAGE WHERE rowid in (SELECT max(rowid) FROM SPACE_IMAGE GROUP BY space_id)) i ,(SELECT space_id, title, area, type, total_rate, jjim_cnt FROM SPACE ORDER BY jjim_cnt DESC)spa
+		WHERE spa.space_id = i.space_id AND ROWNUM &lt; 5
+	</select>
+	<!--  찜 횟수 가장 많은 4 -->
+	
+
+	<!-- main에서 공간 12개만 불러오기 -->
+	
+	<select id="getSpaceMain" resultMap="spaceList" flushCache="false" useCache="true">
+		SELECT * 
+        FROM SPACE_IMAGE i, (SELECT space_id, title, area, type
+                            FROM SPACE
+                            WHERE ROWNUM &lt; 13) spa
+        WHERE spa.space_id = i.space_id
+        ORDER BY spa.space_id DESC 
+	</select>
+	<!-- main에서 공간 12개만 불러오기 끝 -->
+	
+	<!-- 공간 다 불러오기 -->
+	
+	<resultMap id="spaceList" type="Space">
+		<id property="space_id" column="space_id"/>
+		<result property="title" column="title"/>
+		<result property="type" column="type"/>
+		<result property="area" column="area"/>
+		<result property="jjim_cnt" column="jjim_cnt"/>
+		<collection property="image_list" ofType="String">
+			<result property="image_name" column="image_name"/>
+		</collection>
+	</resultMap>
+
+	<select id="getAllSpace" useCache="true" flushCache="false" resultMap="spaceList">
+		SELECT s.space_id, title, area, type, image_name, jjim_cnt
+		FROM SPACE s , SPACE_IMAGE i
+		WHERE s.space_id = i.space_id
+		ORDER BY s.space_id DESC 
+	</select>
+	<!-- 공간 다 불러오기 끝 -->
+	
+	
+
+	<!-- 나는 제공자 내가 등록한 공간 불러오기 -->
+	<select id="getMySpace" resultMap="SpaceSummary" flushCache="false" useCache="true">
+		SELECT s.space_id, title, area, type, image_name, jjim_cnt
+		FROM SPACE s , SPACE_IMAGE i
+		WHERE s.space_id = i.space_id AND s.memId = #{memId}
+		ORDER BY s.space_id DESC
+	</select>
+	<!-- 나는 제공자 내가 등록한 공간 불러오기 끝 -->
+	
+	
+	
+	<!-- 내가 찜한 공간 불러오기 -->
+	<select id="myJjimSpace" resultMap="SpaceSummary" flushCache="false" useCache="true">
+	  	SELECT s.space_id, title, area, type, image_name, jjim_cnt
+		FROM space s, jjim j, SPACE_IMAGE i
+		WHERE s.space_id = j.space_id AND j.memid = #{memId} AND j.jjim_check=1 AND s.space_id = i.space_id
+  	</select>
+	<!-- 내가 찜한 공간 불러오기 끝 -->
+
+
+
+	<!--  나는 제공자 내가 등록한 공간 개수 불러오기 -->
+<!-- 	<select id="getNumOfMySpace" resultMap="SpacesSummary" flushCache="false" useCache="true"> -->
+<!-- 		SELECT COUNT(*) -->
+<!-- 		FROM SPACE s, SPACE_IMAGE i -->
+<!-- 		WHERE s.space_id = i.space_id AND s.memId = #{memId} -->
+<!-- 	</select> -->
+	<!--  나는 제공자 내가 등록한 공간 개수 불러오기 끝 -->
+
+
+	<!-- 공간 아이디로 불러오기 -->
+	<resultMap type="Space" id="spaceById">
+		<id column="space_id" property="space_id" />
+		<result column="title" property="title" />
+		<result column="type" property="type" />
+		<result column="area" property="area" />
+		<result column="cost" property="cost" />
+		<result column="max_people" property="max_people" />
+		<result column="introduce" property="introduce" />
+		<result column="facility" property="facility" />
+		<result column="guide" property="guide" />
+		<result column="content" property="content" />
+		<result column="total_rate" property="total_rate" />
+		<result property="jjim_cnt" column="jjim_cnt"/>
+		<collection property="image_list" ofType="String">
+			<result column="image_name" property="image_name" />
+		</collection>		
+		<collection property="Member" ofType="Member">
+			<result column="memId" property="memId" />
+			<result column="name" property="name" />
+			<result column="email" property="email" />
+			<result column="grade" property="grade" />
+			<result column="profile" property="profile" />
+		</collection>
+	</resultMap>
+	<select id="getSpaceById" resultMap="spaceById" flushCache="false" useCache="true">
+		SELECT *
+		FROM MEMBER m, ( SELECT *
+		FROM SPACE s
+		NATURAL JOIN SPACE_IMAGE
+		WHERE space_id = #{space_id} ) ss
+
+		WHERE ss.memId = m.memId
+	</select>
+	<!-- 공간 아이디로 불러오기 끝 -->
+	
+	
+	<!-- 공간 찜순 정렬 -->
+	<select id="getOrderByJJim" resultMap="SpaceSummary" flushCache="false" useCache="true">
+		SELECT s.space_id, title, type, area, image_name, jjim_cnt
+		FROM space s, space_image i
+		WHERE s.space_id = i.space_id
+		ORDER BY jjim_cnt DESC
+	</select>
+	<!-- 공간 찜순 정렬 끝 -->
+	
+	
+	<select id="getOrderByRate" resultMap="SpaceSummary" flushCache="false" useCache="true">
+		SELECT s.space_id, title, type, area, image_name, jjim_cnt
+		FROM space s, space_image i
+		WHERE s.space_id = i.space_id
+		ORDER BY total_rate DESC
+	</select>
+	
+
+	
+	<!--  공간 검색 -->
+	<select id="searchSpace" parameterType="map" resultMap="spaceList" flushCache="false" useCache="true">
+		SELECT s.space_id, s.title, s.type, s.area, i.image_name, jjim_cnt
+		FROM space s, space_image i
+		WHERE (s.${condition} = #{keyword} OR s.${condition} LIKE '%'||#{keyword}||'%') AND s.space_id = i.space_id
+	</select>
+	<!-- 공간 검색 끝 -->
+	
+	
+	<!--  공간 주소 이름 같이 검색 -->
+	<select id="searchSpace2" parameterType="map" resultMap="spaceList" flushCache="false" useCache="true">
+		SELECT s.space_id, s.title, s.type, s.area, i.image_name, jjim_cnt
+		FROM space s, space_image i
+		WHERE (s.area = #{area} OR s.area LIKE '%'||#{area}||'%') AND (s.title = #{title} OR s.title LIKE '%'||#{title}||'%') AND  s.space_id = i.space_id
+	</select>
+	<!-- 공간 주소 이름 같이 검색 끝 -->
+	
+
+	<!-- 공간 삽입 -->
+	<insert id="insertSpace" parameterType="Space">
+		<selectKey keyProperty="space_id" resultType="int" order="BEFORE">
+			SELECT SPACE_ID_SEQ.nextval FROM DUAL
+		</selectKey>
+		
+		INSERT INTO SPACE
+		(space_id, type, title, content, max_people, memid, area, cost, facility, guide, introduce)
+		VALUES
+		(#{space_id}, #{type}, #{title}, #{content}, #{max_people}, #{member.memId},
+		#{area}, #{cost}, #{facility}, #{guide}, #{introduce})		
+	</insert>
+	<insert id="insertSpaceImage" parameterType="java.util.List">
+		<foreach collection="image_list" item="item" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			INTO SPACE_IMAGE (space_id, image_name) VALUES (SPACE_ID_SEQ.currval,
+			#{item})
+		</foreach>
+	</insert>
+	<!-- 공간 삽입 끝 -->
+	
+	
+	<!-- 공간 수정 시작 -->
+	<update id="updateSpace" parameterType="Space">
+		UPDATE SPACE
+		SET title = #{title}, content = #{content}, max_people = #{max_people}, cost = #{cost}, facility = #{facility}, guide = #{guide}, introduce = #{introduce}
+		WHERE space_id = #{space_id}
+	</update>	
+	<delete id="deleteBeforeUpdate" parameterType="int">
+		DELETE FROM SPACE_IMAGE
+		WHERE space_id = #{space_id}
+	</delete>	
+	<insert id="reinsertSpaceImage" parameterType="Space">
+		<foreach collection="image_list" item="item" index="index"
+			separator=" " open="INSERT ALL" close="SELECT * FROM DUAL">
+			INTO SPACE_IMAGE (space_id, image_name) VALUES (#{space_id},#{item})
+		</foreach>
+	</insert>
+	<!-- 공간 수정 끝  -->
+
+</mapper>

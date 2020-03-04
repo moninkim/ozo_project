@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE tiles-definitions PUBLIC
+       "-//Apache Software Foundation//DTD Tiles Configuration 3.0//EN"
+       "http://tiles.apache.org/dtds/tiles-config_3_0.dtd">
+
+<tiles-definitions>
+	<definition name="base_layout" template="/WEB-INF/view/tiles/template/layout.jsp">
+		<put-attribute name="title" value="OZO Project" type="string"/>
+		<put-attribute name="header" value="/WEB-INF/view/tiles/nav.jsp" />
+		<put-attribute name="footer" value="/WEB-INF/view/tiles/footer.jsp" />
+	</definition>
+	
+	<definition name="notitles" template="/WEB-INF/view/tiles/template/loglayout.jsp">
+        <put-attribute name="title" value="OZO Project" type="string"/>
+    </definition>
+
+
+	
+	
+	<definition name="index" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/index.jsp" />
+	</definition>	
+	
+	
+	<definition name="about" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/about.jsp" />
+	</definition>	
+	
+	<definition name="NoPermission" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/NoPermission.jsp" />
+	</definition>	
+	
+	<definition name="kakaoPayError" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/reserve/kakaoPayError.jsp" />
+	</definition>
+	
+	<definition name="/member/memcheck" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/member/memcheck.jsp" />
+	</definition>	
+	
+	<definition name="member/loginForm" extends="notitles">
+		<put-attribute name="body" value="/WEB-INF/view/member/loginForm.jsp" />
+	</definition>
+	<definition name="member/updateForm" extends="notitles">
+		<put-attribute name="body" value="/WEB-INF/view/member/updateForm.jsp" />
+	</definition>
+	<definition name="member/signupForm" extends="notitles">
+		<put-attribute name="body" value="/WEB-INF/view/member/signupForm.jsp" />
+	</definition>	
+	
+	
+	<definition name="*/*" extends="base_layout">
+		<put-attribute name="body" value="/WEB-INF/view/{1}/{2}.jsp" />
+	</definition> 
+	
+</tiles-definitions>

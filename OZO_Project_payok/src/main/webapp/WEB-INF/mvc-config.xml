@@ -1,0 +1,87 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:context="http://www.springframework.org/schema/context"
+	xsi:schemaLocation="http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+
+
+    <context:component-scan base-package="org.springframework.ozo.controller"/>  
+
+	<mvc:interceptors>
+       <mvc:interceptor>
+              <mvc:mapping path="/space/newRegister"/>         
+              <mvc:mapping path="/member/mypage"/>
+              <mvc:mapping path="/review/write"/>
+              <mvc:mapping path="/space/newReserve"/>   
+              <mvc:mapping path="/space/update"/>         
+              <mvc:mapping path="/reserve/veiwreserve"/>        
+              <mvc:mapping path="/reserve/registerForm"/>                 
+              <bean class="org.springframework.ozo.interceptor.AuthenticationInterceptor"></bean>
+       </mvc:interceptor>
+	</mvc:interceptors>
+	
+ 
+	<bean id="tilesConfigurer" class="org.springframework.web.servlet.view.tiles3.TilesConfigurer">
+        <property name="definitions">
+            <list>
+                <value>/WEB-INF/view/tiles/template/tiles.xml</value>
+            </list>
+        </property>
+    </bean>	
+    <!-- ========================= TILES VIEW RESOLVER ========================= -->
+    <bean id="tilesViewResolver" class="org.springframework.web.servlet.view.UrlBasedViewResolver">
+		<property name="order" value="0"/>
+		<property name="viewClass" value="org.springframework.web.servlet.view.tiles3.TilesView" />
+
+	</bean>
+
+	
+	
+
+
+
+    <mvc:annotation-driven />
+    
+    <mvc:default-servlet-handler />
+	
+	
+	
+	<mvc:resources mapping="/img/**" location="/resources/img/" />
+	
+	<mvc:view-controller path="/about" view-name="about" />
+	<mvc:view-controller path="/member/memcheck" view-name="/member/memcheck" />
+	<mvc:view-controller path="/NoPermission" view-name="NoPermission" />
+	<mvc:view-controller path="/kakaoPayError" view-name="kakaoPayError" />
+
+
+	
+	
+	
+	<bean id="viewResolver" class="org.springframework.web.servlet.view.InternalResourceViewResolver">
+		<property name="prefix" value="/WEB-INF/view/"/>
+		<property name="suffix" value=".jsp"/>
+		<property name="order" value="4"/>
+	</bean>
+
+
+
+	<bean id="messageSource"
+		class="org.springframework.context.support.ResourceBundleMessageSource">
+		<property name="basenames">
+			<list>
+				<value>messages.validation</value>
+			</list>
+		</property>
+	</bean>
+	
+	
+	
+	
+	
+	
+	
+	
+</beans>

@@ -1,0 +1,78 @@
+<?xml version="1.0" encoding="UTF-8"?>
+
+<beans xmlns="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+	xmlns:context="http://www.springframework.org/schema/context" xmlns:mybatis="http://mybatis.org/schema/mybatis-spring"
+	xmlns:mvc="http://www.springframework.org/schema/mvc" xmlns:tx="http://www.springframework.org/schema/tx"
+	xsi:schemaLocation="http://mybatis.org/schema/mybatis-spring http://mybatis.org/schema/mybatis-spring-1.2.xsd
+		http://www.springframework.org/schema/mvc http://www.springframework.org/schema/mvc/spring-mvc-3.0.xsd
+		http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd
+		http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd
+		http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx.xsd" >
+    
+    
+    <bean id="transactionManager" class="org.springframework.jdbc.datasource.DataSourceTransactionManager">
+    	<property name="dataSource" ref="dataSource"/>
+	</bean>
+    <tx:annotation-driven proxy-target-class="true" transaction-manager="transactionManager"/>
+    
+    <!-- data source 설정 -->
+	<bean id="dataSource" class="org.apache.commons.dbcp2.BasicDataSource">
+		<property name="driverClassName" value="oracle.jdbc.driver.OracleDriver" />
+		<property name="url" value="jdbc:oracle:thin:@202.20.119.117:1521:orcl" />
+		<property name="username" value="swsd01_5" />
+		<property name="password" value="wegetaplus" />
+	</bean>
+
+	<!-- MyBatis SqlSessionFactoryBean 생성 -->
+	<bean id="sqlSessionFactoryBean" class="org.mybatis.spring.SqlSessionFactoryBean">
+		<property name="typeAliasesPackage" value="org.springframework.ozo.domain" />
+		<property name="dataSource" ref="dataSource" />
+		<property name="configLocation" value="/WEB-INF/mybatis-config.xml"></property>
+		<property name="mapperLocations">
+			<array>
+				<value>classpath*:/org/springframework/ozo/mapper/**/*.xml</value>
+			</array>
+		</property>		
+	</bean>
+	
+	<!-- MyBatis SqlSessionTemplate bean 생성 -->
+	<bean id="sqlSessionTemplate" class="org.mybatis.spring.SqlSessionTemplate">
+		<constructor-arg name="sqlSessionFactory" ref="sqlSessionFactoryBean" />
+	</bean>
+	
+	<!-- MyBatis MapperScannerConfigurer -->
+  	<mybatis:scan base-package="org.springframework.ozo.mybatis.mapper"/> 
+    
+    
+    
+    
+    
+    <context:component-scan base-package="org.springframework.ozo"/>  
+    
+    <bean id="mailSender" class = "org.springframework.mail.javamail.JavaMailSenderImpl">
+      <property name="host" value="smtp.gmail.com" />
+      <property name="port" value="587" />
+      <property name="username" value="ddprojectozo@gmail.com" />
+      <property name="password" value="wegetaplus" />
+      <property name="javaMailProperties">
+         <props>
+               <prop key="mail.transport.protocol">smtp</prop>
+               <prop key="mail.smtp.auth">true</prop>
+               <prop key="mail.smtp.starttls.enable">true</prop>
+               <prop key="mail.debug">true</prop>
+         </props>
+      </property>
+   </bean>
+   
+   <bean id="multipartResolver"  class="org.springframework.web.multipart.commons.CommonsMultipartResolver">
+         <property name="maxUploadSize" value="52428800" />
+         <property name="maxInMemorySize" value="1048576" />
+         <property name="defaultEncoding" value="utf-8" />
+	</bean>
+   
+   
+   
+   
+   
+
+</beans>
