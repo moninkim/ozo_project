@@ -20,7 +20,7 @@ xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xs
 		<servlet.version>2.5</servlet.version>
 		
 		<!-- Spring -->
-		<spring-framework.version>4.3.14.RELEASE</spring-framework.version>
+		<spring-framework.version>5.2.20.RELEASE</spring-framework.version>
 		
 		<dbcp.version>2.2.0</dbcp.version>
 
